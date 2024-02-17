@@ -42,8 +42,7 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'channel',
     'direct_message',
-    'messages',
-    'thread',
+    'conversations',
     'user',
 ]
 

@@ -10,4 +10,4 @@ class AbstractMessage(models.Model):
     files = models.FileField(upload_to='channel_messages/', blank=True, null=True)
 
     def __str__(self):
-        return self.title
+        return self.created_at.strftime('%Y-%m-%d %H:%M:%S')
