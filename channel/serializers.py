@@ -3,6 +3,7 @@ from channel.models import Channel, ChannelMessage, ChannelThread,ChannelThreadM
 
 
 class ChannelSerializer(serializers.ModelSerializer):
+    created_by = serializers.ReadOnlyField(source='created_by.username')
     class Meta:
         model = Channel
         fields = '__all__'
