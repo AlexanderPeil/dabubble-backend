@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.conf import settings
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -20,6 +19,8 @@ from rest_framework import viewsets
 
 from user.models import CustomUser
 from user.serializers import CustomUserSerializer, ResetPasswordSerializer
+
+import uuid
 
 
 class SignupView(APIView):
@@ -147,3 +148,18 @@ class ResetPasswordView(APIView):
             except CustomUser.DoesNotExist:
                 return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class GuestLoginView(APIView):
+    def post(self, request):
+        guest_username = f'guest_{uuid.uuid4().hex[:8]}'
+
+        guest_user = CustomUser.objects.create_user(username=guest_username, password=uuid.uuid4().hex)
+        token, created = Token.objects.get_or_create(user=guest_user)
+
+        return Response({
+            "token": token.key,
+            "user_id": guest_user.pk,
+            "username": guest_user.username, 
+            "email": guest_user.email
+        })
