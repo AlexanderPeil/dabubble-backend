@@ -133,6 +133,22 @@ class UserViewSet(viewsets.ModelViewSet):
         return CustomUser.objects.none() 
     
 
+class LoggeduserView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = CustomUserSerializer(request.user)
+        return Response(serializer.data)   
+    
+    def patch(self, request):
+        serializer = CustomUserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
 class ResetPasswordView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = ResetPasswordSerializer(data=request.data)
