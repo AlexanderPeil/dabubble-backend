@@ -4,7 +4,7 @@ import uuid
 
 
 class CustomUser(AbstractUser):
-    photo = models.ImageField(upload_to='photos')
+    photo = models.CharField(max_length=255, blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     verification_token = models.UUIDField(default=uuid.uuid4, editable=False)
     is_online = models.BooleanField(default=False)
