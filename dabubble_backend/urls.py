@@ -11,7 +11,8 @@ from user.views import (
     SignupView,
     LoginView,
     LogoutView,
-    DeleteUserView
+    DeleteUserView,
+    VerifyEmailView
 )
 
 
@@ -28,6 +29,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('api/password_reset/', include('django_rest_passwordreset.urls')),
+    path('verify/<str:token>/', VerifyEmailView.as_view(), name='verify-email'),
 ]  + static(settings.MEDIA_URL , document_root = settings.MEDIA_ROOT)
 
 
