@@ -1,5 +1,7 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -64,7 +66,7 @@ ROOT_URLCONF = 'dabubble_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        "DIRS": [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,6 +77,10 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+INTERNAL_IPS = [
+    "127.0.0.1",
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -124,15 +130,17 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# DEFAULT_FROM_EMAIL = os.environ.get('emailUser')
-# FRONTEND_URL = 'http://localhost:4200'
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = os.environ.get('emailHost') 
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = os.environ.get('emailUser') 
-# EMAIL_HOST_PASSWORD = os.environ.get('emailPassword')
+
+DEFAULT_FROM_EMAIL = os.environ.get('emailUser')
+FRONTEND_URL = 'http://localhost:4200'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('emailHost') 
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('emailUser') 
+EMAIL_HOST_PASSWORD = os.environ.get('emailPassword')
 
 
 # Internationalization

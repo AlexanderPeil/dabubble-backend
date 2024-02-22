@@ -1,3 +1,5 @@
+import os
+import random
 from django.shortcuts import render
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
@@ -21,6 +23,7 @@ from user.models import CustomUser
 from user.serializers import CustomUserSerializer, ResetPasswordSerializer
 
 import uuid
+from random import randint
 
 
 class SignupView(APIView):
@@ -34,18 +37,19 @@ class SignupView(APIView):
         
         serializer.is_valid(raise_exception=True)
         user = CustomUser(**serializer.data)
-        password = request.data.get('passsword')
+        password = request.data.get('password')
         user.set_password(password)
         user.save()
         self.send_verification_email(user)
 
-        return Response({'user'. serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({'user': serializer.data}, status=status.HTTP_201_CREATED)
 
 
     def send_verification_email(self, user):
         subject = 'Please confirm your email'
         context = {
-            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
             'verification_url': f'{settings.FRONTEND_URL}/verify/{user.verification_token}'
         }
         
@@ -79,19 +83,19 @@ class LoginView(APIView):
     permission_classes = []
     authentication_classes = []
 
-    def pos(self, request):
-        email = request.data.get('email')
+    def post(self, request):
+        username = request.data.get('username')
         password = request.data.get('password')
-        user = authenticate(email=email, password=password)
+        user = authenticate(username=username, password=password)
 
         if user is not None:
             if not user.is_verified:
                 return Response({"error": "Please verify your email first."}, status=status.HTTP_401_UNAUTHORIZED)
-            
+
             token, created = Token.objects.get_or_create(user=user)
             return Response({"token": token.key}, status=status.HTTP_200_OK)
 
-        return Response({"error": "Invalid login data"}, status=status.HTTP_401_UNAUTHORIZED) 
+        return Response({"error": "Invalid login data"}, status=status.HTTP_401_UNAUTHORIZED)           
     
 
 class LogoutView(APIView):
@@ -133,6 +137,22 @@ class UserViewSet(viewsets.ModelViewSet):
         return CustomUser.objects.none() 
     
 
+class LoggeduserView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = CustomUserSerializer(request.user)
+        return Response(serializer.data)   
+    
+    def patch(self, request):
+        serializer = CustomUserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
 class ResetPasswordView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = ResetPasswordSerializer(data=request.data)
@@ -150,16 +170,47 @@ class ResetPasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
+
 class GuestLoginView(APIView):
     def post(self, request):
-        guest_username = f'guest_{uuid.uuid4().hex[:8]}'
+        random_number = randint(1000, 9999)
+        guest_username = f'guest_{random_number}'
 
-        guest_user = CustomUser.objects.create_user(username=guest_username, password=uuid.uuid4().hex)
+        photos_path = os.path.join('assets/random_photos')
+        available_photos = os.listdir(photos_path)
+        random_photo = random.choice(available_photos)  # Wählt ein zufälliges Foto aus
+
+        # Hier nimmst du den relativen Pfad zum Foto
+        random_photo_path = os.path.join('assets/random_photos', random_photo)
+
+        # Benutzer erstellen
+        guest_user = CustomUser.objects.create_user(
+            username=guest_username,
+            password=uuid.uuid4().hex,
+            photo=random_photo_path)
         token, created = Token.objects.get_or_create(user=guest_user)
+
+        photo_url = request.build_absolute_uri(guest_user.photo.url)
 
         return Response({
             "token": token.key,
             "user_id": guest_user.pk,
-            "username": guest_user.username, 
-            "email": guest_user.email
+            "email": guest_user.email,
+            "photo": photo_url 
         })
+
+
+
+# class GuestLoginView(APIView):
+#     def post(self, request):
+#         random_number = randint(1000, 9999)
+#         guest_username = f'guest_{random_number}'
+
+#         guest_user = CustomUser.objects.create_user(username=guest_username, password=uuid.uuid4().hex)
+#         token, created = Token.objects.get_or_create(user=guest_user)
+
+#         return Response({
+#             "token": token.key,
+#             "user_id": guest_user.pk,
+#             "email": guest_user.email
+#         })
