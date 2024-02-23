@@ -5,6 +5,7 @@ from django.urls import include, path
 from dabubble_backend import settings
 from user.views import UserViewSet
 from rest_framework import routers
+from channel.views import ChannelViewSet
 from user.views import (
     GuestLoginView, 
     LoggeduserView,
@@ -18,9 +19,11 @@ from user.views import (
 
 router = routers.DefaultRouter()
 router.register(r'user', UserViewSet, basename='user')
+router.register(r'channels', ChannelViewSet, basename='channel')
 
 
 urlpatterns = [
+    path('', include(router.urls)),
     path('admin/', admin.site.urls),
     path('guest-login/', GuestLoginView.as_view(), name='guest-login'),
     path('edit-user/', LoggeduserView.as_view(), name='edit-user'),
