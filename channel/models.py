@@ -9,8 +9,8 @@ User = get_user_model()
 class Channel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=100)
-    description = models.TextField(max_length=300)
-    members = models.ManyToManyField(User, related_name='channels', blank=True)
+    description = models.TextField(max_length=300, blank=True)
+    members = models.ManyToManyField(User, related_name='channels')
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):

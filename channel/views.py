@@ -31,7 +31,7 @@ class ChannelViewSet(viewsets.ModelViewSet):
     serializer_class = ChannelSerializer
 
     def get_queryset(self):
-        return Channel.objects.all.order_by("title")
+        return Channel.objects.all().order_by("title")
     
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
